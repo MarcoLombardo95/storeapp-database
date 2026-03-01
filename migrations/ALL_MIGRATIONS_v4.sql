@@ -348,6 +348,7 @@ SELECT
     a.end_time,
     EXTRACT(ISODOW FROM a.start_date) as day_of_week,
     a.start_date as activity_date,
+    a.end_date,
     CASE 
         WHEN a.activity_type = 'EVENT' THEN a.event_location_name
         WHEN a.activity_type = 'TRIP' THEN a.trip_origin_name || ' → ' || a.trip_destination_name
@@ -377,7 +378,7 @@ FROM activities a
 LEFT JOIN activity_participants ap ON a.id = ap.activity_id
 LEFT JOIN users u ON a.created_by = u.id
 GROUP BY a.id, a.group_id, a.name, a.description, a.start_time, a.end_time, 
-         a.start_date, a.is_completed, a.activity_type,
+         a.start_date, a.end_date, a.is_completed, a.activity_type,
          a.event_location_name, a.event_location_latitude, a.event_location_longitude,
          a.trip_origin_name, a.trip_destination_name, a.trip_origin_latitude, a.trip_origin_longitude,
          u.name, u.avatar_url;
