@@ -24,6 +24,8 @@ CREATE TABLE users (
     avatar_url VARCHAR(500),
     google_id VARCHAR(255) UNIQUE,
     password_hash VARCHAR(255),
+    password_reset_token_hash VARCHAR(64),
+    password_reset_token_expires_at TIMESTAMP,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     
@@ -37,6 +39,8 @@ CREATE TABLE users (
 
 CREATE INDEX idx_users_email ON users(email);
 CREATE INDEX idx_users_google_id ON users(google_id) WHERE google_id IS NOT NULL;
+CREATE INDEX idx_users_password_reset_token_hash ON users(password_reset_token_hash)
+    WHERE password_reset_token_hash IS NOT NULL;
 
 -- =====================================================
 -- V2: Create GROUPS table
@@ -211,7 +215,13 @@ CREATE TABLE activities (
     CONSTRAINT fk_activity_creator FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE SET NULL,
     
     -- General constraints
-    CONSTRAINT check_activity_times CHECK (end_time IS NULL OR start_time IS NULL OR end_time > start_time),
+    -- Allows end_time < start_time when end_date > start_date (overnight / multi-day activities)
+    CONSTRAINT check_activity_times CHECK (
+        end_time IS NULL OR start_time IS NULL OR
+        end_date IS NULL OR start_date IS NULL OR
+        end_date > start_date OR
+        (end_date = start_date AND end_time > start_time)
+    ),
     CONSTRAINT check_activity_dates CHECK (end_date IS NULL OR end_date >= start_date),
     CONSTRAINT check_activity_type CHECK (activity_type IN ('EVENT', 'TRIP')),
     

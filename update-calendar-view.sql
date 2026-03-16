@@ -15,6 +15,7 @@ SELECT
     a.end_time,
     EXTRACT(ISODOW FROM a.start_date) AS day_of_week,
     a.start_date AS activity_date,
+    a.end_date,
     COALESCE(
         a.event_location_name,
         CASE WHEN a.trip_origin_name IS NOT NULL AND a.trip_destination_name IS NOT NULL
@@ -41,7 +42,7 @@ FROM activities a
 LEFT JOIN activity_participants ap ON a.id = ap.activity_id
 LEFT JOIN users u ON a.created_by = u.id
 GROUP BY a.id, a.group_id, a.name, a.description, a.start_time, a.end_time,
-         a.start_date, a.is_completed,
+         a.start_date, a.end_date, a.is_completed,
          a.event_location_name, a.event_location_latitude, a.event_location_longitude,
          a.trip_origin_name, a.trip_destination_name, a.trip_origin_latitude, a.trip_origin_longitude,
          u.name, u.avatar_url;
